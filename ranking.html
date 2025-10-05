@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>いまのポイント</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      font-family: sans-serif;
+      background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+      padding: 30px;
+      text-align: center;
+    }
+    h1 {
+      color: #1976d2;
+    }
+    table {
+      margin: 20px auto;
+      border-collapse: collapse;
+      width: 90%;
+      max-width: 600px;
+    }
+    th, td {
+      border: 1px solid #aaa;
+      padding: 8px;
+    }
+    th {
+      background-color: #90caf9;
+    }
+    .highlight {
+      background-color: #ffecb3;
+      font-weight: bold;
+    }
+    .home-button {
+      margin-top: 30px;
+    }
+    .home-button button {
+      font-size: 1.1em;
+      padding: 10px 20px;
+      border-radius: 10px;
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>💰 いまのポイント</h1>
+  <div id="studentNameDisplay"></div>
+  <h2>段ごとのポイント</h2>
+  <div id="pointsTable">読み込み中...</div>
+
+  <h2>ランキング（この端末内）</h2>
+  <div id="rankingTable">読み込み中...</div>
+
+  <div class="home-button">
+    <button onclick="goHome()">🏠 ホームにもどる</button>
+  </div>
+
+  <script>
+    function getCurrentName() {
+      return localStorage.getItem("currentStudent");
+    }
+
+    function goHome() {
+      location.href = "home.html";
+    }
+
+    function loadPointsAndRanking() {
+      const name = getCurrentName();
+      document.getElementById("studentNameDisplay").textContent = `${name} さんのポイント`;
+
+      const key = `studentData_${name}`;
+      const data = JSON.parse(localStorage.getItem(key)) || { pointsByDan: {}, badges: [] };
+      const points = data.pointsByDan || {};
+
+      // 段ごとのポイント表示
+      const table = document.getElementById("pointsTable");
+      let html = "<table><tr><th>段</th><th>ポイント</th></tr>";
+      let total = 0;
+      for (let dan = 2; dan <= 9; dan++) {
+        const p = points[dan] || 0;
+        total += p;
+        html += `<tr><td>${dan}</td><td>${p}</td></tr>`;
+      }
+      html += `<tr><th>合計</th><th>${total}</th></tr></table>`;
+      table.innerHTML = html;
+
+      // ランキング表示（localStorage内の全ユーザー）
+      const ranking = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k.startsWith("studentData_")) {
+          const studentName = k.replace("studentData_", "");
+          const d = JSON.parse(localStorage.getItem(k));
+          const pts = d.pointsByDan || {};
+          let sum = 0;
+          for (let dan = 2; dan <= 9; dan++) {
+            sum += pts[dan] || 0;
+          }
+          ranking.push({ name: studentName, total: sum });
+        }
+      }
+
+      ranking.sort((a, b) => b.total - a.total);
+      const rankTable = document.getElementById("rankingTable");
+      let rhtml = "<table><tr><th>順位</th><th>名前</th><th>ポイント</th></tr>";
+      ranking.forEach((entry, index) => {
+        const highlight = entry.name === name ? "highlight" : "";
+        rhtml += `<tr class="${highlight}"><td>${index + 1}</td><td>${entry.name}</td><td>${entry.total}</td></tr>`;
+      });
+      rhtml += "</table>";
+      rankTable.innerHTML = rhtml;
+    }
+
+    loadPointsAndRanking();
+  </script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>れんしゅうのきろく</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+      padding: 30px;
+      text-align: center;
+    }
+    h1 {
+      color: #388e3c;
+    }
+    table {
+      margin: 20px auto;
+      border-collapse: collapse;
+      width: 90%;
+      max-width: 600px;
+    }
+    th, td {
+      border: 1px solid #aaa;
+      padding: 8px;
+    }
+    th {
+      background-color: #a5d6a7;
+    }
+    canvas {
+      max-width: 600px;
+      margin: 20px auto;
+    }
+    .home-button {
+      margin-top: 30px;
+    }
+    .home-button button {
+      font-size: 1.1em;
+      padding: 10px 20px;
+      border-radius: 10px;
+      background-color: #388e3c;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>📈 れんしゅうのきろく</h1>
+  <div id="studentNameDisplay"></div>
+
+  <h2>段ごとの記録</h2>
+  <div id="progressTable">読み込み中...</div>
+
+  <h2>日付別の履歴</h2>
+  <div id="historyTable">読み込み中...</div>
+
+  <h2>苦手な問題</h2>
+  <div id="mistakeList">読み込み中...</div>
+
+  <h2>ポイントグラフ</h2>
+  <canvas id="pointsChart"></canvas>
+
+  <div class="home-button">
+    <button onclick="goHome()">🏠 ホームにもどる</button>
+  </div>
+
+  <script>
+    function getCurrentName() {
+      return localStorage.getItem("currentStudent");
+    }
+
+    function goHome() {
+      location.href = "home.html";
+    }
+
+    function loadProgress() {
+      const name = getCurrentName();
+      document.getElementById("studentNameDisplay").textContent = `${name} さんの記録`;
+
+      // 段ごとの記録
+      const progress = JSON.parse(localStorage.getItem(`studentProgress_${name}`)) || {};
+      const table = document.getElementById("progressTable");
+      if (Object.keys(progress).length === 0) {
+        table.textContent = "まだ記録がありません";
+      } else {
+        let html = "<table><tr><th>段</th><th>正解</th><th>合計</th><th>正答率</th></tr>";
+        for (let dan = 2; dan <= 9; dan++) {
+          const record = progress[dan];
+          if (!record) continue;
+          const rate = record.total > 0 ? Math.round((record.correct / record.total) * 100) : 0;
+          html += `<tr><td>${dan}</td><td>${record.correct}</td><td>${record.total}</td><td>${rate}%</td></tr>`;
+        }
+        html += "</table>";
+        table.innerHTML = html;
+      }
+
+      // 日付別履歴
+      const history = JSON.parse(localStorage.getItem(`studentProgressHistory_${name}`)) || {};
+      const historyTable = document.getElementById("historyTable");
+      if (Object.keys(history).length === 0) {
+        historyTable.textContent = "まだ履歴がありません";
+      } else {
+        let html = "<table><tr><th>日付</th><th>段</th><th>正解</th><th>合計</th></tr>";
+        for (const date in history) {
+          for (const dan in history[date]) {
+            const h = history[date][dan];
+            html += `<tr><td>${date}</td><td>${dan}</td><td>${h.correct}</td><td>${h.total}</td></tr>`;
+          }
+        }
+        html += "</table>";
+        historyTable.innerHTML = html;
+      }
+
+      // 苦手問題
+      const mistakes = JSON.parse(localStorage.getItem(`studentMistakes_${name}`)) || {};
+      const mistakeList = document.getElementById("mistakeList");
+      if (Object.keys(mistakes).length === 0) {
+        mistakeList.textContent = "苦手な問題はありません";
+      } else {
+        const sorted = Object.entries(mistakes).sort((a, b) => b[1] - a[1]);
+        let html = "<table><tr><th>問題</th><th>まちがえた回数</th></tr>";
+        sorted.forEach(([problem, count]) => {
+          html += `<tr><td>${problem}</td><td>${count}</td></tr>`;
+        });
+        html += "</table>";
+        mistakeList.innerHTML = html;
+      }
+
+      // ポイントグラフ
+      const data = JSON.parse(localStorage.getItem(`studentData_${name}`)) || { pointsByDan: {} };
+      const labels = [];
+      const values = [];
+      for (let dan = 2; dan <= 9; dan++) {
+        labels.push(`${dan}の段`);
+        values.push(data.pointsByDan[dan] || 0);
+      }
+
+      new Chart(document.getElementById("pointsChart"), {
+        type: "bar",
+        data: {
+          labels: labels,
+          datasets: [{
+            label: "ポイント",
+            data: values,
+            backgroundColor: "#66bb6a"
+          }]
+        },
+        options: {
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    }
+
+    loadProgress();
+  </script>
+</body>
+</html>

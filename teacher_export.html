@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>CSV出力</title>
+  <style>
+    body { font-family: sans-serif; padding: 30px; background: #e0f7fa; text-align: center; }
+    h1 { color: #00838f; }
+    button { font-size: 1.1em; padding: 10px 20px; border-radius: 10px; background-color: #00838f; color: white; border: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>📁 CSV出力</h1>
+  <button onclick="exportCSV()">記録をダウンロード</button>
+  <script>
+    function exportCSV() {
+      let csv = "名前,段,正解,合計\n";
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith("studentProgress_")) {
+          const name = key.replace

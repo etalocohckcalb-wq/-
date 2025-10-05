@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>苦手傾向</title>
+  <style>
+    body { font-family: sans-serif; padding: 30px; background: #fffde7; text-align: center; }
+    h1 { color: #fbc02d; }
+    table { margin: 20px auto; border-collapse: collapse; width: 90%; max-width: 600px; }
+    th, td { border: 1px solid #aaa; padding: 8px; }
+    th { background-color: #fff59d; }
+  </style>
+</head>
+<body>
+  <h1>❌ 苦手傾向</h1>
+  <div id="mistakeTable">読み込み中...</div>
+  <script>
+    function loadMistakes() {
+      const container = document.getElementById("mistakeTable");
+      let html = "<table><tr><th>名前</th><th>問題</th><th>回数</th></tr>";
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith("studentMistakes_")) {
+          const name = key.replace("studentMistakes_", "");
+          const mistakes = JSON.parse(localStorage.getItem(key));
+          const sorted = Object.entries(mistakes).sort((a, b) => b[1] - a[1]);
+          sorted.forEach(([problem, count]) => {
+            html += `<tr><td>${name}</td><td>${problem}</td><td>${count}</td></tr>`;
+          });
+        }
+      }
+      html += "</table>";
+      container.innerHTML = html;
+    }
+    loadMistakes();
+  </script>
+</body>
+</html>

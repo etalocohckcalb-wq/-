@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>教師用ホーム</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      font-family: sans-serif;
+      background: linear-gradient(135deg, #fff8e1, #ffe082);
+      padding: 30px;
+      text-align: center;
+    }
+    h1 {
+      color: #f57c00;
+    }
+    .menu-button {
+      display: block;
+      margin: 15px auto;
+      font-size: 1.2em;
+      padding: 12px 24px;
+      border-radius: 10px;
+      background-color: #f57c00;
+      color: white;
+      border: none;
+      width: 80%;
+      max-width: 300px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      cursor: pointer;
+    }
+    .menu-button:hover {
+      background-color: #ef6c00;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧑‍🏫 教師用ホーム</h1>
+
+  <button class="menu-button" onclick="go('teacher_students.html')">👥 児童の記録を見る</button>
+  <button class="menu-button" onclick="go('teacher_badges.html')">🏅 バッジ獲得状況</button>
+  <button class="menu-button" onclick="go('teacher_mistakes.html')">❌ 苦手傾向の確認</button>
+  <button class="menu-button" onclick="go('teacher_qr.html')">📄 プリント用QRコード生成</button>
+  <button class="menu-button" onclick="go('teacher_export.html')">📁 CSVで記録を出力</button>
+  <button class="menu-button" onclick="go('index.html')">🔓 ログアウト</button>
+
+  <script>
+    function go(page) {
+      location.href = page;
+    }
+  </script>
+</body>
+</html>

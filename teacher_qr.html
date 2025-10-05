@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>QRコード生成</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: linear-gradient(135deg, #ede7f6, #d1c4e9);
+      padding: 30px;
+      text-align: center;
+    }
+    h1 {
+      color: #5e35b1;
+    }
+    .section {
+      margin-bottom: 40px;
+    }
+    .qr-block {
+      display: inline-block;
+      margin: 15px;
+      padding: 10px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    canvas {
+      margin-top: 10px;
+    }
+    input, select {
+      font-size: 1.1em;
+      padding: 8px;
+      margin: 5px;
+    }
+    button {
+      font-size: 1.1em;
+      padding: 10px 20px;
+      border-radius: 10px;
+      background-color: #5e35b1;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>📄 QRコード生成</h1>
+
+  <!-- プリント用QRコード -->
+  <div class="section">
+    <h2>プリント用QRコード（段別ポイント加算）</h2>
+    <p>段を選んでください（複数可）：</p>
+    <label><input type="checkbox" value="2">2の段</label>
+    <label><input type="checkbox" value="3">3の段</label>
+    <label><input type="checkbox" value="4">4の段</label>
+    <label><input type="checkbox" value="5">5の段</label>
+    <label><input type="checkbox" value="6">6の段</label>
+    <label><input type="checkbox" value="7">7の段</label>
+    <label><input type="checkbox" value="8">8の段</label>
+    <label><input type="checkbox" value="9">9の段</label>
+    <br>
+    <button onclick="generatePrintQR()">プリント用QRコードを生成</button>
+    <div id="printQRArea"></div>
+  </div>
+
+  <!-- 児童ログインQRコード -->
+  <div class="section">
+    <h2>児童ログインQRコード（名前入り）</h2>
+    <p>児童の名前を入力してください：</p>
+    <input type="text" id="studentName" placeholder="たろう">
+    <br>
+    <button onclick="generateLoginQR()">ログインQRコードを生成</button>
+    <div id="loginQRArea"></div>
+  </div>
+
+  <!-- 共通ログインQRコード -->
+  <div class="section">
+    <h2>共通ログインQRコード（名前入力画面に接続）</h2>
+    <button onclick="generateSharedQR()">共通ログインQRコードを生成</button>
+    <div id="sharedQRArea"></div>
+  </div>
+
+  <!-- 先生用ログインQRコード -->
+  <div class="section">
+    <h2>先生用ログインQRコード</h2>
+    <button onclick="generateTeacherLoginQR()">先生用QRコードを生成</button>
+    <div id="teacherQRArea"></div>
+  </div>
+
+  <script>
+    function generatePrintQR() {
+      const selectedDans = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+        .map(cb => parseInt(cb.value));
+      const qrArea = document.getElementById("printQRArea");
+      qrArea.innerHTML = "";
+
+      if (selectedDans.length === 0) {
+        qrArea.textContent = "段を1つ以上選んでください";
+        return;
+      }
+
+      selectedDans.forEach(dan => {
+        const qrText = `dan:${dan}`;
+        const block = document.createElement("div");
+        block.className = "qr-block";
+
+        const label = document.createElement("div");
+        label.textContent = `${dan}の段（プリント記録）`;
+        label.style.fontWeight = "bold";
+
+        const canvas = document.createElement("canvas");
+        QRCode.toCanvas(canvas, qrText, { width: 200 }, err => {
+          if (!err) {
+            block.appendChild(label);
+            block.appendChild(canvas);
+            qrArea.appendChild(block);
+          } else {
+            block.textContent = `QRコード生成失敗（${dan}の段）`;
+            qrArea.appendChild(block);
+          }
+        });
+      });
+    }
+
+    function generateLoginQR() {
+      const name = document.getElementById("studentName").value.trim();
+      const qrArea = document.getElementById("loginQRArea");
+      qrArea.innerHTML = "";
+
+      if (!name) {
+        qrArea.textContent = "名前を入力してください";
+        return;
+      }
+
+      const qrText = `login:${name}`;
+      const block = document.createElement("div");
+      block.className = "qr-block";
+
+      const label = document.createElement("div");
+      label.textContent = `${name} さんのログインQR`;
+      label.style.fontWeight = "bold";
+
+      const canvas = document.createElement("canvas");
+      QRCode.toCanvas(canvas, qrText, { width: 200 }, err => {
+        if (!err) {
+          block.appendChild(label);
+          block.appendChild(canvas);
+          qrArea.appendChild(block);
+        } else {
+          block.textContent = "QRコード生成に失敗しました";
+          qrArea.appendChild(block);
+        }
+      });
+    }
+
+    function generateSharedQR() {
+      const qrArea = document.getElementById("sharedQRArea");
+      qrArea.innerHTML = "";
+
+      const qrText = "https://九九の学習.com/index.html"; // ← 実際のURLに変更
+      const block = document.createElement("div");
+      block.className = "qr-block";
+
+      const label = document.createElement("div");
+      label.textContent = `共通ログインQR（名前入力画面）`;
+      label.style.fontWeight = "bold";
+
+      const canvas = document.createElement("canvas");
+      QRCode.toCanvas(canvas, qrText, { width: 200 }, err => {
+        if (!err) {
+          block.appendChild(label);
+          block.appendChild(canvas);
+          qrArea.appendChild(block);
+        } else {
+          block.textContent = "QRコード生成に失敗しました";
+          qrArea.appendChild(block);
+        }
+      });
+    }
+
+    function generateTeacherLoginQR() {
+      const qrArea = document.getElementById("teacherQRArea");
+      qrArea.innerHTML = "";
+
+      const qrText = "https://yourapp.com/teacher_home.html"; // ← 実際のURLに変更
+      const block = document.createElement("div");
+      block.className = "qr-block";
+
+      const label = document.createElement("div");
+      label.textContent = `先生用ログインQR`;
+      label.style.fontWeight = "bold";
+
+      const canvas = document.createElement("canvas");
+      QRCode.toCanvas(canvas, qrText, { width: 200 }, err => {
+        if (!err) {
+          block.appendChild(label);
+          block.appendChild(canvas);
+          qrArea.appendChild(block);
+        } else {
+          block.textContent = "QRコード生成に失敗しました";
+          qrArea.appendChild(block);
+        }
+      });
+    }
+  </script>
+</body>
+</html>

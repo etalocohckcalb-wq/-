@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>苦手問題にちょうせん</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      font-family: sans-serif;
+      background: linear-gradient(135deg, #fffde7, #fff9c4);
+      padding: 30px;
+      text-align: center;
+    }
+    .keypad button {
+      font-size: 1.5em;
+      padding: 15px;
+      margin: 5px;
+      width: 60px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    #answerDisplay {
+      font-size: 2em;
+      margin: 10px;
+    }
+    #feedback {
+      font-size: 1.2em;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    .home-button {
+      margin-top: 30px;
+    }
+    .home-button button {
+      font-size: 1.1em;
+      padding: 10px 20px;
+      border-radius: 10px;
+      background-color: #fbc02d;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔁 苦手問題にちょうせん</h1>
+  <h2 id="question">問題が表示されます</h2>
+  <div id="answerDisplay"></div>
+  <div class="keypad">
+    <button onclick="appendDigit(1)">1</button>
+    <button onclick="appendDigit(2)">2</button>
+    <button onclick="appendDigit(3)">3</button><br>
+    <button onclick="appendDigit(4)">4</button>
+    <button onclick="appendDigit(5)">5</button>
+    <button onclick="appendDigit(6)">6</button><br>
+    <button onclick="appendDigit(7)">7</button>
+    <button onclick="appendDigit(8)">8</button>
+    <button onclick="appendDigit(9)">9</button><br>
+    <button onclick="appendDigit(0)">0</button>
+    <button onclick="clearAnswer()">←</button>
+    <button onclick="submitAnswer()">OK</button>
+  </div>
+  <p id="feedback"></p>
+
+  <div class="home-button">
+    <button onclick="goHome()">🏠 ホームにもどる</button>
+  </div>
+
+  <script src="js/main.js"></script>
+  <script>
+    let mistakeList = [], currentIndex = 0;
+    let currentX = 0, currentY = 0, answer = "";
+
+    function getCurrentName() {
+      return localStorage.getItem("currentStudent");
+    }
+
+    function goHome() {
+      location.href = "home.html";
+    }
+
+    function loadMistakes() {
+      const name = getCurrentName();
+      const key = `studentMistakes_${name}`;
+      const mistakes = JSON.parse(localStorage.getItem(key)) || {};
+
+      mistakeList = Object.keys(mistakes).map(text => {
+        const [x, y] = text.split("×").map(Number);
+        return { x, y };
+      });
+
+      if (mistakeList.length === 0) {
+        document.getElementById("question").textContent = "苦手な問題はありません！";
+        return;
+      }
+
+      mistakeList.sort(() => Math.random() - 0.5);
+      currentIndex = 0;
+      nextQuestion();
+    }
+
+    function nextQuestion() {
+      if (currentIndex >= mistakeList.length) {
+        document.getElementById("question").textContent = "すべての苦手問題に挑戦しました！";
+        return;
+      }
+
+      const q = mistakeList[currentIndex];
+      currentX = q.x;
+      currentY = q.y;
+      answer = "";
+      document.getElementById("question").textContent = `${currentX} × ${currentY} = ?`;
+      document.getElementById("answerDisplay").textContent = "";
+      document.getElementById("feedback").textContent = "";
+    }
+
+    function submitAnswer() {
+      if (!answer) {
+        document.getElementById("feedback").textContent = "答えを入力してください";
+        return;
+      }
+
+      const correct = currentX * currentY;
+      const input = parseInt(answer);
+      const feedback = document.getElementById("feedback");
+
+      if (input === correct) {
+        feedback.textContent = "⭕ 正解！";
+        saveProgress(currentX, 1, 1);
+        addPoints(currentX, 3);
+        updateProgressHistory(currentX, true);
+      } else {
+        feedback.textContent = `❌ 不正解… 正解は ${correct}`;
+        saveProgress(currentX, 0, 1);
+        updateProgressHistory(currentX, false);
+        recordMistake(`${currentX}×${currentY}`);
+      }
+
+      setTimeout(() => {
+        currentIndex++;
+        nextQuestion();
+      }, 1000);
+    }
+
+    function appendDigit(digit) {
+      answer += digit;
+      document.getElementById("answerDisplay").textContent = answer;
+    }
+
+    function clearAnswer() {
+      answer = answer.slice(0, -1);
+      document.getElementById("answerDisplay").textContent = answer;
+    }
+
+    loadMistakes();
+  </script>
+</body>
+</html>

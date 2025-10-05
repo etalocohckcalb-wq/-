@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>九九のれんしゅう</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      font-family: sans-serif;
+      background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+      padding: 30px;
+      text-align: center;
+    }
+    .keypad button {
+      font-size: 1.5em;
+      padding: 15px;
+      margin: 5px;
+      width: 60px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    #answerDisplay {
+      font-size: 2em;
+      margin: 10px;
+    }
+    #feedback {
+      font-size: 1.2em;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    .selector-group {
+      margin-bottom: 20px;
+    }
+    .home-button {
+      margin-top: 30px;
+    }
+    .home-button button {
+      font-size: 1.2em;
+      padding: 10px 20px;
+      border-radius: 10px;
+      background-color: #2196f3;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧮 九九のれんしゅう</h1>
+
+  <div class="selector-group">
+    <p>段を選んでください：</p>
+    <label><input type="checkbox" value="2">2の段</label>
+    <label><input type="checkbox" value="3">3の段</label>
+    <label><input type="checkbox" value="4">4の段</label>
+    <label><input type="checkbox" value="5">5の段</label>
+    <label><input type="checkbox" value="6">6の段</label>
+    <label><input type="checkbox" value="7">7の段</label>
+    <label><input type="checkbox" value="8">8の段</label>
+    <label><input type="checkbox" value="9">9の段</label>
+  </div>
+
+  <div class="selector-group">
+    <p>出題順：</p>
+    <label><input type="radio" name="order" value="asc" checked>昇り順</label>
+    <label><input type="radio" name="order" value="desc">下り順</label>
+    <label><input type="radio" name="order" value="random">ランダム</label>
+  </div>
+
+  <button onclick="startPractice()">スタート</button>
+
+  <h2 id="question">問題が表示されます</h2>
+  <div id="answerDisplay"></div>
+  <div class="keypad">
+    <button onclick="appendDigit(1)">1</button>
+    <button onclick="appendDigit(2)">2</button>
+    <button onclick="appendDigit(3)">3</button><br>
+    <button onclick="appendDigit(4)">4</button>
+    <button onclick="appendDigit(5)">5</button>
+    <button onclick="appendDigit(6)">6</button><br>
+    <button onclick="appendDigit(7)">7</button>
+    <button onclick="appendDigit(8)">8</button>
+    <button onclick="appendDigit(9)">9</button><br>
+    <button onclick="appendDigit(0)">0</button>
+    <button onclick="clearAnswer()">←</button>
+    <button onclick="submitPracticeAnswer()">OK</button>
+  </div>
+  <p id="feedback"></p>
+
+  <div class="home-button">
+    <button onclick="goHome()">🏠 ホームにもどる</button>
+  </div>
+
+  <script src="js/main.js"></script>
+  <script>
+    let questionList = [], currentIndex = 0;
+    let currentX = 0, currentY = 0, answer = "";
+
+    function startPractice() {
+      const selectedDans = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+        .map(cb => parseInt(cb.value));
+      const order = document.querySelector('input[name="order"]:checked').value;
+
+      if (selectedDans.length === 0) {
+        alert("段を1つ以上選んでください");
+        return;
+      }
+
+      questionList = [];
+      selectedDans.forEach(dan => {
+        const items = [];
+        for (let i = 1; i <= 9; i++) {
+          items.push({ x: dan, y: i });
+        }
+        if (order === "asc") {
+          items.sort((a, b) => a.y - b.y);
+        } else if (order === "desc") {
+          items.sort((a, b) => b.y - a.y);
+        } else {
+          items.sort(() => Math.random() - 0.5);
+        }
+        questionList.push(...items);
+      });
+
+      currentIndex = 0;
+      nextPracticeQuestion();
+    }
+
+    function nextPracticeQuestion() {
+      if (currentIndex >= questionList.length) {
+        document.getElementById("question").textContent = "練習終了！おつかれさま！";
+        return;
+      }
+
+      const q = questionList[currentIndex];
+      if (!q) {
+        document.getElementById("question").textContent = "次の問題が見つかりません";
+        return;
+      }
+
+      currentX = q.x;
+      currentY = q.y;
+      answer = "";
+      document.getElementById("question").textContent = `${currentX} × ${currentY} = ?`;
+      document.getElementById("answerDisplay").textContent = "";
+      document.getElementById("feedback").textContent = "";
+    }
+
+    function submitPracticeAnswer() {
+      if (!answer) {
+        document.getElementById("feedback").textContent = "答えを入力してください";
+        return;
+      }
+
+      const correct = currentX * currentY;
+      const input = parseInt(answer);
+      const feedback = document.getElementById("feedback");
+
+      if (input === correct) {
+        feedback.textContent = "⭕ 正解！";
+        saveProgress(currentX, 1, 1);
+        addPoints(currentX, 5);
+        updateProgressHistory(currentX, true);
+        checkBadge(currentX);
+      } else {
+        feedback.textContent = `❌ 不正解… 正解は ${correct}`;
+        saveProgress(currentX, 0, 1);
+        updateProgressHistory(currentX, false);
+        recordMistake(`${currentX}×${currentY}`);
+      }
+
+      setTimeout(() => {
+        currentIndex++;
+        nextPracticeQuestion();
+      }, 1000);
+    }
+
+    function appendDigit(digit) {
+      answer += digit;
+      document.getElementById("answerDisplay").textContent = answer;
+    }
+
+    function clearAnswer() {
+      answer = answer.slice(0, -1);
+      document.getElementById("answerDisplay").textContent = answer;
+    }
+
+    function goHome() {
+      location.href = "home.html"; // ✅ ホーム画面に遷移
+    }
+  </script>
+</body>
+</html>

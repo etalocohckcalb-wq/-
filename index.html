@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ログイン</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      font-family: sans-serif;
+      background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+      padding: 30px;
+      text-align: center;
+    }
+    h1 {
+      color: #ef6c00;
+    }
+    input {
+      font-size: 1.2em;
+      padding: 10px;
+      width: 250px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    button {
+      font-size: 1.2em;
+      padding: 10px 20px;
+      border-radius: 10px;
+      background-color: #ef6c00;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    #reader {
+      margin-top: 30px;
+    }
+  </style>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+<body>
+  <h1>👧 お名前を入力してください</h1>
+
+  <input type="text" id="studentName" placeholder="たろう">
+  <br>
+  <button onclick="start()">スタート</button>
+
+  <div id="reader"></div>
+  <p id="qrResult"></p>
+
+  <script>
+    // ✅ 自動ログイン処理
+    const existingName = localStorage.getItem("currentStudent");
+    if (existingName) {
+      location.href = "home.html";
+    }
+
+    // ✅ 手動ログイン処理
+    function start() {
+      const name = document.getElementById("studentName").value.trim();
+      if (!name) {
+        alert("名前を入力してください");
+        return;
+      }
+      localStorage.setItem("currentStudent", name);
+      location.href = "home.html";
+    }
+
+    // ✅ QRコードログイン処理
+    function onScanSuccess(decodedText) {
+      const result = document.getElementById("qrResult");
+
+      if (decodedText.startsWith("login:")) {
+        const name = decodedText.replace("login:", "");
+        localStorage.setItem("currentStudent", name);
+        result.textContent = `✅ ${name} さんでログインしました`;
+        html5QrCode.stop().then(() => {
+          location.href = "home.html";
+        });
+      } else {
+        result.textContent = "❌ QRコードの形式が正しくありません";
+      }
+    }
+
+    const html5QrCode = new Html5Qrcode("reader");
+    Html5Qrcode.getCameras().then(devices => {
+      if (devices && devices.length) {
+        html5QrCode.start(
+          devices[0].id,
+          { fps: 10, qrbox: 250 },
+          onScanSuccess
+        );
+      } else {
+        document.getElementById("qrResult").textContent = "カメラが見つかりません";
+      }
+    }).catch(err => {
+      document.getElementById("qrResult").textContent = "カメラの起動に失敗しました";
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>児童の記録</title>
+  <style>
+    body { font-family: sans-serif; padding: 30px; background: #e3f2fd; text-align: center; }
+    h1 { color: #1976d2; }
+    table { margin: 20px auto; border-collapse: collapse; width: 90%; max-width: 600px; }
+    th, td { border: 1px solid #aaa; padding: 8px; }
+    th { background-color: #90caf9; }
+  </style>
+</head>
+<body>
+  <h1>👥 児童の記録</h1>
+  <div id="studentTable">読み込み中...</div>
+  <script>
+    function loadStudents() {
+      const container = document.getElementById("studentTable");
+      let html = "<table><tr><th>名前</th><th>合計ポイント</th></tr>";
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith("studentData_")) {
+          const name = key.replace("studentData_", "");
+          const data = JSON.parse(localStorage.getItem(key));
+          const pts = data.pointsByDan || {};
+          let total = 0;
+          for (let dan = 2; dan <= 9; dan++) total += pts[dan] || 0;
+          html += `<tr><td>${name}</td><td>${total}</td></tr>`;
+        }
+      }
+      html += "</table>";
+      container.innerHTML = html;
+    }
+    loadStudents();
+  </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>名前入力</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <h1>九九チャレンジ</h1>
+  <p>あなたの名前を入力してください：</p>
+  <input type="text" id="studentName" placeholder="例：たろう">
+  <button onclick="saveName()">スタート</button>
+
+  <script>
+    function saveName() {
+      const name = document.getElementById("studentName").value.trim();
+      if (!name) {
+        alert("名前を入力してください");
+        return;
+      }
+      localStorage.setItem("currentStudent", name);
+      location.href = "index.html"; // ホーム画面へ移動
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>バッジ一覧</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      font-family: sans-serif;
+      background: linear-gradient(135deg, #fce4ec, #f8bbd0);
+      padding: 30px;
+      text-align: center;
+    }
+    h1 {
+      color: #d81b60;
+    }
+    .badge {
+      font-size: 1.2em;
+      margin: 10px;
+      padding: 10px 20px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      display: inline-block;
+    }
+    .home-button {
+      margin-top: 30px;
+    }
+    .home-button button {
+      font-size: 1.1em;
+      padding: 10px 20px;
+      border-radius: 10px;
+      background-color: #d81b60;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>🏅 バッジ一覧</h1>
+  <div id="badgeList">読み込み中...</div>
+
+  <div class="home-button">
+    <button onclick="goHome()">🏠 ホームにもどる</button>
+  </div>
+
+  <script>
+    function getCurrentName() {
+      return localStorage.getItem("currentStudent");
+    }
+
+    function formatBadgeName(badgeId) {
+      if (badgeId.startsWith("Dan") && badgeId.includes("_NoteBadge")) {
+        const dan = badgeId.match(/^Dan(\d)_NoteBadge$/)[1];
+        return `🎵 ${dan}の段・音符バッジ`;
+      }
+      if (badgeId === "NoteBadge_Complete") return "🎶 コンプリート音符バッジ";
+      if (badgeId.startsWith("Dan") && badgeId.includes("_Master45")) {
+        const dan = badgeId.match(/^Dan(\d)_Master45$/)[1];
+        return `🥇 ${dan}の段・マスターバッジ`;
+      }
+      return badgeId;
+    }
+
+    function loadBadges() {
+      const name = getCurrentName();
+      const key = `studentData_${name}`;
+      const data = JSON.parse(localStorage.getItem(key)) || { badges: [] };
+      const badgeList = document.getElementById("badgeList");
+
+      if (!data.badges || data.badges.length === 0) {
+        badgeList.textContent = "まだバッジはありません";
+        return;
+      }
+
+      badgeList.innerHTML = "";
+      data.badges.forEach(badgeId => {
+        const div = document.createElement("div");
+        div.className = "badge";
+        div.textContent = formatBadgeName(badgeId);
+        badgeList.appendChild(div);
+      });
+    }
+
+    function goHome() {
+      location.href = "home.html";
+    }
+
+    loadBadges();
+  </script>
+</body>
+</html>

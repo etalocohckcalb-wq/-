@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ホーム</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      font-family: sans-serif;
+      background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+      padding: 30px;
+      text-align: center;
+    }
+    h1 {
+      color: #1976d2;
+    }
+    .menu-button {
+      display: block;
+      margin: 15px auto;
+      font-size: 1.2em;
+      padding: 12px 24px;
+      border-radius: 10px;
+      background-color: #2196f3;
+      color: white;
+      border: none;
+      width: 80%;
+      max-width: 300px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      cursor: pointer;
+    }
+    #studentNameDisplay {
+      margin-bottom: 20px;
+      font-size: 1.1em;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>🏠 ホーム</h1>
+  <div id="studentNameDisplay">こんにちは！</div>
+
+  <button class="menu-button" onclick="go('practice.html')">🧮 九九のれんしゅう</button>
+  <button class="menu-button" onclick="go('badges.html')">🏅 バッジ一覧</button>
+  <button class="menu-button" onclick="go('retry.html')">🔁 苦手問題にちょうせん</button>
+  <button class="menu-button" onclick="go('progress.html')">📈 れんしゅうのきろく</button>
+  <button class="menu-button" onclick="go('ranking.html')">💰 いまのポイント</button>
+  <button class="menu-button" onclick="go('oral_check.html')">🧑‍🏫 先生へのちょうせん</button>
+  <button class="menu-button" onclick="go('print.html')">📄 プリント</button>
+
+  <script>
+    function go(page) {
+      location.href = page;
+    }
+
+    const name = localStorage.getItem("currentStudent");
+    if (name) {
+      document.getElementById("studentNameDisplay").textContent = `こんにちは、${name} さん！`;
+    } else {
+      document.getElementById("studentNameDisplay").textContent = "※ 名前が未登録です。";
+    }
+  </script>
+</body>
+</html>

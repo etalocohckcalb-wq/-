@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>バッジ獲得状況</title>
+  <style>
+    body { font-family: sans-serif; padding: 30px; background: #fce4ec; text-align: center; }
+    h1 { color: #d81b60; }
+    .badge { margin: 5px; padding: 5px 10px; background: #fff; border-radius: 10px; display: inline-block; }
+  </style>
+</head>
+<body>
+  <h1>🏅 バッジ獲得状況</h1>
+  <div id="badgeList">読み込み中...</div>
+  <script>
+    function formatBadge(badgeId) {
+      if (badgeId.includes("_Master45")) return `🥇 ${badgeId.replace("Dan", "").replace("_Master45", "")}の段`;
+      if (badgeId.includes("_NoteBadge")) return `🎵 ${badgeId.replace("Dan", "").replace("_NoteBadge", "")}の段`;
+      return badgeId;
+    }
+    function loadBadges() {
+      const container = document.getElementById("badgeList");
+      let html = "";
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith("studentData_")) {
+          const name = key.replace("studentData_", "");
+          const data = JSON.parse(localStorage.getItem(key));
+          const badges = data.badges || [];
+          html += `<h3>${name}</h3>`;
+          if (badges.length === 0) {
+            html += "バッジなし<br>";
+          } else {
+            badges.forEach(b => html += `<span class="badge">${formatBadge(b)}</span>`);
+            html += "<br>";
+          }
+        }
+      }
+      container.innerHTML = html;
+    }
+    loadBadges();
+  </script>
+</body>
+</html>

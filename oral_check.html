@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>先生にチャレンジ</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #fff3e0;
+      padding: 30px;
+      text-align: center;
+    }
+    select {
+      font-size: 1.2em;
+      padding: 10px;
+      margin: 10px;
+    }
+    button {
+      font-size: 1.2em;
+      padding: 12px 20px;
+      margin-top: 20px;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 1.2em;
+      color: #4caf50;
+    }
+  </style>
+</head>
+<body>
+  <h1>先生にチャレンジ</h1>
+  <p>児童が口頭で九九を言えたら、段を選んでポイントを加算しましょう。</p>
+
+  <select id="studentSelector"></select>
+  <select id="danSelector">
+    <option value="2">2の段</option>
+    <option value="3">3の段</option>
+    <option value="4">4の段</option>
+    <option value="5">5の段</option>
+    <option value="6">6の段</option>
+    <option value="7">7の段</option>
+    <option value="8">8の段</option>
+    <option value="9">9の段</option>
+  </select>
+  <br>
+  <button onclick="confirmOralSuccess()">口頭で言えた！</button>
+  <div id="result"></div>
+
+  <script src="js/main.js"></script>
+  <script>
+    // 児童一覧を読み込む
+    const selector = document.getElementById("studentSelector");
+    const studentKeys = Object.keys(localStorage).filter(k => k.startsWith("studentData_"));
+    const studentNames = studentKeys.map(k => k.replace("studentData_", ""));
+    studentNames.forEach(name => {
+      const option = document.createElement("option");
+      option.value = name;
+      option.textContent = name;
+      selector.appendChild(option);
+    });
+  </script>
+</body>
+</html>

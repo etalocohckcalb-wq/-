@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>プリントの記録</title>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+      padding: 30px;
+      text-align: center;
+    }
+    h1 {
+      color: #8e24aa;
+    }
+    #reader {
+      width: 300px;
+      margin: 0 auto;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+    .home-button {
+      margin-top: 30px;
+    }
+    .home-button button {
+      font-size: 1.1em;
+      padding: 10px 20px;
+      border-radius: 10px;
+      background-color: #8e24aa;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>📄 プリントの記録</h1>
+  <div id="reader"></div>
+  <div id="result">QRコードを読み取ってください</div>
+
+  <div class="home-button">
+    <button onclick="goHome()">🏠 ホームにもどる</button>
+  </div>
+
+  <script src="js/main.js"></script>
+  <script>
+    function getCurrentName() {
+      return localStorage.getItem("currentStudent");
+    }
+
+    function goHome() {
+      location.href = "home.html";
+    }
+
+    function onScanSuccess(decodedText, decodedResult) {
+      const resultDiv = document.getElementById("result");
+
+      // 例: QRコードが "dan:3" の形式
+      if (decodedText.startsWith("dan:")) {
+        const dan = parseInt(decodedText.replace("dan:", ""));
+        if (dan >= 2 && dan <= 9) {
+          addPoints(dan, 45);
+          saveProgress(dan, 0, 0); // 正解数は加算しないが履歴に残す
+          checkBadge(dan);
+          resultDiv.textContent = `✅ ${dan}の段のプリント記録！45ポイントを追加しました`;
+        } else {
+          resultDiv.textContent = "❌ 認識できない段です";
+        }
+      } else {
+        resultDiv.textContent = "❌ QRコードの形式が正しくありません";
+      }
+
+      html5QrCode.stop(); // 一度読み取ったら停止
+    }
+
+    const html5QrCode = new Html5Qrcode("reader");
+    Html5Qrcode.getCameras().then(devices => {
+      if (devices && devices.length) {
+        html5QrCode.start(
+          devices[0].id,
+          { fps: 10, qrbox: 250 },
+          onScanSuccess
+        );
+      } else {
+        document.getElementById("result").textContent = "カメラが見つかりません";
+      }
+    }).catch(err => {
+      document.getElementById("result").textContent = "カメラの起動に失敗しました";
+    });
+  </script>
+</body>
+</html>
